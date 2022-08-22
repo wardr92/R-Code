@@ -1,2 +1,2 @@
 # R-Code
-Repository containing various R scripts
+A repository containing various R scripts
