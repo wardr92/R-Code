@@ -1,0 +1,208 @@
+---
+title: "Basic Data Checks"
+output: github_document
+---
+
+# 1. DATA PREPARATIONS ####
+## 1a. Set Up  ====
+### 1.1a. Install Packages & Load Libraries ----
+
+```{r Packages}
+
+# Install the following packages
+install.packages("psych")     
+install.packages("tidyverse") 
+install.packages("readr")  
+
+```
+
+```{r Libraries}
+
+# Load the following libraries
+library(psych)
+library(tidyverse)
+library(readr)
+
+```
+
+### 1.2a. Set Up Directory & Load Data ----
+
+```{r Directory}
+
+# Directory
+getwd()
+setwd("/Users/wardr/Desktop")
+getwd()
+
+```
+
+```{r Load_Data}
+
+# Load data
+library(dslabs) 
+data("murders") # loads murders dataset
+
+```
+
+## 1b. Dealing with Duplicate Cases & Anomolies ====
+### 1.1b. Identify & Remove Duplicate Cases ----
+
+```{r Duplicate_Cases}
+
+# Look at data
+view(murders)
+
+# Identify duplicates in data
+duplicated(murders) # Identifying cases that are duplicates, returns "TRUE" for cases repeating
+murders[duplicated(murders), ]  # Only displaying duplicates
+
+```
+
+```{r Unique_Cases}
+
+# Look at data
+view(murders)
+
+# Identify unique cases in data
+unique(murders) # Lists unique cases
+
+```
+
+```{r Dealing_with_Duplicates}
+
+# Look at data
+view(murders)
+
+# Create New Dataset Without Duplicates or With Only Unique Cases
+NewMurders1 <- unique(murders)
+NewMurders2 <- distinct(murders)
+
+# Look over new dataset (note no differences between the ways we did this)
+view(NewMurders1)
+view(NewMurders2)
+
+```
+
+### 1.2b. Identify & Remove Anomolies ----
+
+```{r Detect_Anomolies}
+
+# Summary statistics of dataset to identify outliers
+summary(murders)
+
+# Sort categorical variables
+murders_StateSorted <- murders[order(murders$state), ] # Sorts state by ascending order
+murders_StateAbbSorted <- murders[order(!murders$abb), ] # Sorts state abbreviation by ascending order
+murders_Region <- murders[order(murders$region), ] # Sorts region by ascending order
+
+# Look over data
+view(murders_StateSorted)
+view(murders_StateAbbSorted)
+view(murders_Region)
+
+```
+
+```{r Correct_Anomolies}
+
+# DC is listed as being in the "South", let's change this to "Northeast"
+DC_indx <- which(murders$abb == "DC") # index DC
+murders[DC_indx, "region"] = "Northeast"
+
+```
+
+## 1c. Dealing with Missing Values ====
+### 1.1c. Identify Missing Values ----
+
+```{r Identify_Missing}
+
+# Identify indices of missing values for each column
+which(is.na(murders$region))
+
+# Calculate missing cases for a column
+AllMiss <- is.na(murders$region) # Creating a vector for the missing values with logical returns 
+sum(AllMiss) # Total counts of missing values
+
+# Calculate Proportion of Missing Data from All Columns
+PropMiss <- function(x){sum(is.na(x))/length(x)*100} # function to calculate % of missing cases
+apply(murders, 2, PropMiss) # Calculate % of missing cases in all columns
+
+# Calculate Proportion of Non-Missing Data from All Columns
+PropPresent <- function(x){sum(!is.na(x))/length(x)*100} # function to calculate % of non-missing cases
+apply(murders, 2, PropPresent) # Calculate % of non-missing cases in all columns
+
+```
+
+### 1.2c. Remove Cases with Missing Values ----
+
+```{r Removing_Missing}
+
+# Create new datset without missing cases
+No_NA_Murders <- na.omit(murders) # new data creating omitting NAs
+
+# Or you can apply the na.rm = "T" function to a dataframe
+mean(murders$total, na.rm = "T")
+
+#   *******  Creating a new data set without missing values   ******* 
+
+sum(is.na(training2))           # Total No. of missing values in Training2
+newtraining<-na.omit(training2) # Creating the data set without missing values
+sum(is.na(newtraining))         # Checking whether newtraining has missing values
+
+```
+
+### 1.3c. Working with Missing Values ----
+
+```{r Correlations_with_Missing}
+
+# Run correlations using only complete pairs
+cor(murders$population, murders$total, use="pairwise.complete.obs", method="pearson")    
+
+```
+
+```{r Replace_Missing}
+
+# Replace missing values with a new number or 0
+Variable <- murders$region # create vector for column
+sum(is.na(Variable)) # calculate all missing cases
+Variable[is.na(Variable)] = 0 # replace with 0 for one variable
+murders[is.na(murders)] = 0 # replace with 0 for all variables with missing cases
+
+# Can also use "ifelse" logic to replace missing values with mean of a variable
+Variable <- ifelse(is.na(Variable), 74.73, Variable)
+
+```
+
+## 1d. Outlier Identification & Removal ====
+### 1.1d. Identifying Outliers ----
+
+```{r BoxPlot_2_Identify_Outliers}
+
+# Basic Box Plot
+boxplot(murders$population) # creates boxplot
+boxplot.stats(murders$population) # provides statistics showing lower whisker, 25th, 50th, 75th, and upper whisker ($stats), count ($n), confidence intervals ($conf) and outliers ($out) from boxplot 
+
+```
+
+## 1e. Normalize Variables ====
+### 1.1e. Basic Normalization Techniques ----
+
+```{r Scale_Function}
+
+# Z-score data using scale function
+z_score <- scale(murders$population)
+
+```
+
+```{r Basic_Normalizations}
+
+# Z-score data using scale function
+z_score <- scale(murders$population)
+
+# Min/Max Normalization 
+minPop <- min(murders$population) # minimum value
+maxPop <- max(murders$population) # maximum value
+rangePop <- maxPop - minPop # calculate the range of variable
+normPop <- (murders$population - minPop)/rangePop # normalize variable based on min and max
+summary(normPop)
+
+```
