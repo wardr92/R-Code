@@ -1,0 +1,1113 @@
+---
+title: "R Basics"
+output: github_document
+---
+
+# 1. BASIC FUNCTIONS & DATA SORTING ####
+## 1a. The Foundations of R  ====
+### 1.1a. Getting Started ----
+
+```{r Headers}
+
+# Headers can be used to organize a script for data wrangling, manipulations, and analyses
+
+# 1. LEVEL 1 HEADER ####
+## 1a. Level 2 Header ====
+### 1.1a. level 3 header. ----
+
+```
+
+```{r Directories}
+
+getwd() # Shows current working directory file path
+
+setwd("/User/Richard/Desktop") # Sets new working directory based on file path input
+
+getwd() # Double check to make sure your working directory is set correctly
+
+```
+
+```{r Packages}
+
+install.packages("tidyverse") # installs tidyverse package
+install.packages("tidyverse", "dslabs") # installs  multiple packages at once
+
+installed.packages() # Checks to see what packages are installed
+
+library(tidyverse) # loads a library
+library(tidyverse, dslabs) # loads multiple libraries at once
+
+# Once a package is installed on your machine, you will only need to load it for when you open R next time
+
+```
+
+```{r Loading_Data}
+
+library(readr) # load the readr library
+library(R.matlab) # load the R.matlab library
+
+
+Data <- read.csv("filepath/filename.csv",
+                 header=T) # load CSV files
+
+Data <- read.table("filepath/filename.txt", 
+                   header=T) # load .txt files
+
+Data <- read.table("filepath/filename.txt", 
+                   header=T, sep="\t") 
+# \t is a separator for tabs. R converts missing values into "NA"
+
+Data <- readMat("filepath/filename.mat") # load .mat files
+
+# Header = TRUE (capitalized) if you have headers in the dataset
+# TRUE can be abbreviated as T
+# Header = FALSE in the read.table command tells R that the first row
+# of the dataset is actual data
+
+# Loading data from the internet
+# Type the URL of the dataset instead of the location of the file
+read.table("http://people.math.umass.edu/~lavine/Book/book.data/pinecones.txt", header=T)
+pinecones<-read.table("http://people.math.umass.edu/~lavine/Book/book.data/pinecones.txt", header=T) 
+
+print(pinecones)
+head(pinecones)
+
+```
+
+```{r Cleaning_Up}
+
+rm(murders) # removing one object from the Environment (workspace)
+
+rm (murders, abb) # removing more than one object
+
+rm(list = ls()) # clear environment from packets and dataset (Ctrl+Shift+F10)
+
+dev.off()  # clear plots
+
+cat("\014")  # clear console
+
+```
+
+### 1.2a. Objects and Functions in R ----
+
+```{r Simple_Math}
+
+# R can serve as a simple calculator 
+
+# Type any number below
+9
+
+# Add two numbers
+6 + 3
+
+# Divide two numbers
+9/3
+
+# Multiply two numbers
+4.5*3
+
+# Square (or other) a number
+3^2
+
+# Conduct multiple operations on one line
+6; 6 + 3; 9/3; 4.5*3; 3^2
+
+```
+
+```{r Objects}
+
+# Anything in R is treated as an "object"
+# Objects can be variables, functions, a statistical model, or even a whole data set
+
+# Data types can be characters (strings), numerical or integers (non-decimal numbers),
+# or logical operators (True or False)
+
+# Object names should be meaningful, not include spaces (use "_" instead). 
+# and should not contradict other object or function names
+
+print ("I am an Object?!") # character (string) object
+4.5 + 4.5 # numerical object
+1:10 #  vector of numerical values from 1 to 10
+6 + 3 # integer object 
+
+# This assigns a variable/value to an object
+x = 3
+y = 6
+print(x) # shows variable
+print(y) # shows variable
+
+z = x > y  # tests a logical argument and assigns the outcome to an object
+print(z) # shows variable
+
+class(z) # prints the object class of an object
+
+ls() # Shows names of all objects saved in work space
+
+```
+
+```{r Functions}
+
+# Functions are pre-built code that performs specific operations based on inpit arguments 
+# Parentheses are needed to evaluate any function, and often require at least 1 argument
+
+# Assigns a value to a function
+log(8)
+
+# Assigns an already defined object to a function
+a <- 1
+log(a)
+
+# Functions follow order of inside to out layering of parentheses
+log(exp(1)) # First, does exp of 1, then takes the log of that
+
+# Call help files to read over function manual
+help("log")
+
+# Show argument requirements for a function
+args(log)
+
+# R assumes arguments are entered by the order input is entered unless specified otherwise
+
+```
+
+### 1.3a. Data Types ----
+
+```{r DataFrames}
+
+# Data Frames are most common way of storing datasets 
+
+# Useful for combining multiple types of data into one object
+
+library(dslabs) # load librarys
+data("murders") # loads murders dataset
+
+class(murders) # checks to see what type of data the input is
+
+str(murders) # shows structure of the object
+names(murders) # provides column names of the object
+head(murders) # shows first 6 lines of dataset
+
+# Rows often represent cases/observations
+# Columns often represent variables
+
+# Accessor Operator obtains information from a given column
+murders$population # Shows all values for this column
+
+# Head returns the first or last parts of a vector, matrix, table, data frame or function
+# Tail displays the last few rows
+head(murders, n=7)
+tail(murders, n=10)
+
+```
+
+```{r Creating_Tables}
+
+# Make a table for the number of species living in a region
+Wildlife <- c(rep("Wolvering", 250), # first input indicates name/value, second is reps
+            rep("Grey Wolve", 670),
+            rep("Deer", 7337),
+            rep("Elk",  3770),
+            rep("Bald Eagle", 855),
+            rep("Woodpecker", 2369),
+            rep("Golde Eagle", 157),
+            rep("California Condor", 97))
+print(Wildlife)
+
+# Create a frequency table for these data showing total counts
+freqs <- table(Wildlife)
+print(freqs)
+
+```
+
+```{r Creating_DataFrames}
+
+# Creating a data frame with stringAsFactors = FALSE
+grades <- data.frame(names = c("John", "Juan", "Jean", "Yao"), # one columns
+                     exam_1 = c(95, 80, 90, 85), # another column
+                     exam_2 = c(90, 85, 85, 90), # another column
+                     stringsAsFactors = FALSE) # column names with strings are NOT made into factors
+grades 
+
+# Creating a dataframe from already existing vectors
+
+names<- c("James", "Marcos", "Elena", "Andrea")
+ages<- c(52, 15, 42, 35)
+weight<- c(160, 155, 165, 158)
+Stats<-data.frame(Name = names, Age = ages, Weigh = weight)
+print(Stats)
+
+is.data.frame(Stats) # checks to see if object is a dataframe
+
+# Other ways to create data frames
+m<-rnorm(10, 2, 3)
+m
+n<-rnorm(10, 5, 2)
+n
+o<-data.frame(m, n)
+o
+
+k <- data.frame(x = rnorm(20, 5, 2.3), y = runif(20, 3, 4.5))
+k
+
+# Creating a matrix as an object containing only one type of variable
+s<- matrix(1:9, nrow=3) 
+s
+v<-matrix(1:16, nrow=4)
+v
+g<- matrix(1:25, nrow=5)
+g
+t<-matrix(0, nrow =7, ncol=7)
+t
+is.matrix(t)
+
+```
+
+```{r Vectors}
+
+# A vector is an object containing several inputs which can vary in length
+
+# Define a new vector
+a<-1+1 # creates a vector of one unit (the number 2)
+print(a) # shows variable
+
+b<-21:30  # creates a vector of numbers from 21 to 30
+print(b) # shows variable
+
+c<-c(1, 5, 9, 13, 12, 15)  # a vector containing several numbers concatenated 
+print(c) # shows variable
+
+d<-rep(c(5,10),3)   # vector repeating the numbers 5 and 10 for 3 times 
+print(d)# shows variable
+
+e <- f <- g <- 1992  # creates a cascade of assignments for a vector
+
+h <- c("US", "UK", "Germany") # vector of characters
+
+# Matrix operations based on the previous vector values
+a*b
+a/b
+a^b
+a+b
+a-b
+aa<-a+b
+aa
+2*a
+a/3
+
+# Indexing vectors
+c[1] # examines first element of the vector
+c[2] # examines second element of the vector
+c[3] # examines third element of the vector
+
+c[3:6] # examines the third to sixth elements of the vector
+c[c(3,6)] # examines the third and sixth elements of the vector
+
+c[-3] # examines all but the third element of the vector
+c[-c(3, 6)] # examines all but the third and sixth elements of the vector
+
+murders [,] # accessing all rows and columns
+murders[1, ] # accessing first row and all columns
+murders[1:3,] # accessing first three rows and all columns
+murders[ c(1,3), ] # accessing first and third row and all columns
+murders[ , 3] # accessing column 3 and all rows
+murders[1, 2:3] # accessing first row and 2nd-3rd column
+murders[1:2, 2:3] # accessing 1st-2nd row, 2nd-3rd column
+murders[,c(1,3)] # accessing 1st and 3rd column with all rows
+
+murders$population[murders$population>10000] # accessing a subset of data
+unique(murders$state) # accessing nmber of unique values in a variable
+
+# Using existing data to create vectors
+population <- murders$population # creates numerical vector
+length(population) # shows number of observations for that vector
+
+# Characters can also be stored as vectors
+class(murders$state) # shows character vector in dataframe, often indicated with "s
+
+# Logical vectors are either TRUE or FALSE
+z <- 22 == 22.5
+z
+class(z) # Puts out true or false output
+
+# Factors are categorical in data
+class(murders$region)
+
+levels(murders$region) # Shows levels of factor
+
+# Checking the vector type
+is.vector(a) # examine if the object is a vector
+is.numeric(a) # examine if the object is a numerical vector
+
+# Levels are stored as integers in R, but this is mostly for efficiency 
+
+sequences <- seq(1,10) # vector from 1 to 10
+sequences <- seq(1,10, 3) # vector from 1 to 10 for every 3rd number
+
+# Applying arithmetic functions to vectors
+aa <- c(1, 2, 4, 7, 10)
+aa
+sum(aa)
+length(aa)
+m <- sum(aa)/length(aa) # m is the arithmetic mean
+m
+
+# Creating the arithmetic mean by making a function
+Mean<- function(x){ m <- sum(x)/length(x); return(m) }
+Mean(aa)
+
+# Another example
+bb <- 1:10
+bb
+Mean(bb)
+mean_bb <- sum(bb)/length(bb) # basic mean calculation
+
+# Evaluating the structure of vectors and datasets
+ls() # view all objects created in the workspace
+
+str(murders) # shows structure of dataset
+dim(murders) # number of dimensions
+names(murders) # names of the columns of dataset
+levels(murders$state) # levels in a factor (categorical) variable
+
+```
+
+### 1.3b. Editing Rows & Columns in Data Frames ----
+
+```{r Columns_Add_Remove}
+
+# Columns can be added/removed to data frames in a number of ways
+
+# Create two data frames first
+column.height<- c(6.5, 5.7, 6.7, 5.8)
+column.sex<- c("M", "M", "F", "F")
+column.born<- c("USA", "Mexico", "USA", "USA")
+data<-data.frame(Height = column.height, Sex = column.sex, Born = column.born)
+data
+
+column.age<- c(20, 15, 13, 17)
+column.sex<- c("M", "M", "F", "F")
+column.born<- c("USA", "Mexico", "USA", "USA")
+data2<-data.frame(Age = column.age, Sex = column.sex, Born = column.born)
+data2
+
+# cbind() combines columns of two datasets, but they must have the same number of rows
+NewData <- cbind(data, data2) # Adds all columns from both data sets
+
+# merge will combine data frame columns using a common identifier(s)
+NewData <- merge(data, data2, by = "Sex", all = TRUE) # one identifier to merge
+NewData <- merge(data, data2, by = c("Sex", "Born"), all = TRUE) # two identifiers to merge
+
+# Removing columns manually
+NewData2 <- subset(NewData, select = -Age)  # retain all columns except specified one(s)
+NewData2 <- subset(NewData, select = -c(Age, Born)) # retain all columns except specified one(s)
+NewData2 <- NewData[,-c(3:4)] # retain all columns except specified one(s)
+
+```
+
+```{r Columns_Name_Order}
+
+# Create two data frames first
+column.height<- c(6.5, 5.7, 6.7, 5.8)
+column.sex<- c("M", "M", "F", "F")
+column.born<- c("USA", "Mexico", "USA", "USA")
+data<-data.frame(Height = column.height, Sex = column.sex, Born = column.born)
+data
+
+# Manually rename columns
+colnames(data) <- c("height2", "sex2", "born2")
+data
+
+# Reorder columns by their positions
+colnames(data) # list column names
+data_ordered <- data[,c(1, 3, 2)]
+
+# Reorder columns by their names
+colnames(data) # list column names
+data_ordered <- data[,c("height2", "born2", "sex2")]
+
+```
+
+```{r Rows_Add_Remove}
+
+# Rows can be added/removed to data frames in a number of ways
+
+# Create a data frame first
+column.height<- c(6.5, 5.7, 6.7, 5.8)
+column.sex<- c("M", "M", "F", "F")
+column.born<- c("USA", "Mexico", "USA", "USA")
+data<-data.frame(Height = column.height, Sex = column.sex, Born = column.born)
+data
+
+# Adding one row using rbind()
+newrow <- data.frame(Height = '6.5', Sex = 'F', Born = 'Mexico')
+Data <- rbind(data, newrow)
+
+# Removing rows by using row number
+Data2 <- Data[-c(2),] # retain all rows but specified row number(s)
+Data2 <- Data[-c(1:3),] # retain all rows but specified row number(s)
+
+```
+
+## 1b. Vector Manipulation  ====
+### 1.1b. Sorting by Vectors ----
+
+```{r Vector_Coercion}
+
+# Vectors must be all of the same type
+
+x<- c(1, "canada",3) # R converted the 1 and 3 into characters to match the "Canada" string
+
+# Specific coercions can be forced
+x <- 1:5 # vector of 1 to 5
+y <- as.character(x) # converts vector of x into character strings
+
+# NAs can be introduced from coercion in some cases like below
+x<- c("1", "b", "3")
+as.numeric(x)
+
+# NAs are encountered often, so be ready to handle that
+
+```
+
+```{r Vector_Sorting}
+
+library(dslabs) # loads library
+data(murders) # loads data
+
+# Data can be arranged using sort, order, or rank
+
+# Sort will take a vector and arrange it from the minimum to maximum value
+# (e.g., x <- c(10, 5, 15), sort will result in: 5, 10, 15)
+
+# Order will create an index of the sorted data
+# (e.g., x <- c(10, 5, 15), order will result in 2, 1, 3)
+
+# Rank will provide a vector of ranks for original data
+# (e.g., x <- c(10, 5, 15), Rank will result in 2, 1, 3)
+
+# Sorting data
+sort(murders$total) # sorts data in ascending order
+
+# Order function will give index of vector
+x <- c(31, 4, 15, 92, 65) # create simple vector
+x
+sort(x) # sorts vector in ascending order
+index <- order(x) # returns index that will put x in order
+x[index] # rearranging by this index puts elements in order
+order(x) # shows index that puts x in order
+
+# Order state names by total murders
+murders$state[1:10]
+murders$abb[1:10]
+
+index <- order(murders$total) # Define the index as the order of total murders
+print(index)
+murders$abb[index] # Change the order of the abbreviations column based on the total murders index (showing states lowest to most murders)  
+
+max(murders$total) # compute the highest number from this column
+i_max <- which.max(murders$total) # index the highest number of murders from this column
+murders$state[i_max] # list the name with the highest number of murders based on the index location 
+
+i_min <- which.min(murders$total)
+murders$state[i_min]
+
+# Rank ordering
+x <- c(31, 4, 15, 92, 65)
+x
+rank(x)    # returns ranks (smallest to largest)
+
+```
+
+```{r Vector_Operations}
+
+# Can sort column based on values from other columns
+murders$state[which.max(murders$population)] # Shows which state has the biggest population
+
+# Can compute new data from existing columns
+murder_rate <- murders$total / murders$population * 100000 # Compute murder rate 
+print(murder_rate)
+
+# Sort a column based on decreasing order of another column ordering the states by murder rate
+murders$state[order(murder_rate, decreasing=TRUE)]
+
+```
+
+### 1.2b. Indexing Data  ----
+
+```{r Logical_Operators}
+
+murder_rate <- murders$total / murders$population * 100000 # defines murder rates in a new column
+index <- murder_rate <= 0.71 # logical vector indicating if the murder rate is less than or equal to 0.71
+index
+
+murders$state[index] # shows which states have a lower murder rate than 0.71
+sum(index) # shows how many states have less than 0.71 murder rates
+
+# Logical Vectors can represent Conditions 
+west <- murders$region == "West" # logical vector indicating which states are in the west
+west
+
+safe <- murder_rate <= 1 # logical vector indicating which states are safe (i.e., less than or equal to 1 murder rate)
+safe
+
+index <- safe & west # index that considers when both logical operators are true
+index
+murders$state[index] # shows which states in the west are safe
+
+```
+
+```{r Indexing_Functions}
+
+# Which provides entries of a logical vector that are true
+
+# Match searches for entries in a vector and returns their index
+
+# %in% will examine if each element of a first vector is within a second vector
+
+# Indexing with Which
+x <- c(FALSE, TRUE, FALSE, TRUE, TRUE, FALSE) # create logical vector
+which(x) # shows index of which values are true
+
+index <- which(murders$state == "Massachusetts") # index the state of Massachusetts
+index
+murder_rate[index] # look at murder rate for that state based on the index
+
+# Indexing with Match
+index <- match(c("New York", "Florida", "Texas"), murders$state) # index the states that match the input
+index
+murders$state[index]
+murder_rate[index]
+
+# Indexing with the %in% operator
+x <- c("a", "b", "c", "d", "e")
+y <- c("a", "d", "f")
+y %in% x # provides logical outcomes as to whether the letters in y are also in x
+
+c("Boston", "Dakota", "Washington") %in% murders$state # shows if these names are located in the states column
+
+```
+
+```{r Indexing_DataFrames}
+
+# You can also index specific aspects (rows/columns) from a dataframe
+
+library(dslabs) # load librarys
+data("murders") # loads murders dataset
+
+Viewmurders # to display the data set in a new tab in the data editor window
+head(PlantGrowth) # Render the headers and first 6 rows
+murders[1,1]  # Render the value located in cell (Row,Column). Row=Column=1
+murders[1,2]  # Render the value located at 1st row and 2nd column
+murders[2,1]  # Render the value located at 2nd row and 1st column
+murders[5,]   # Render header and all values from the 5th row
+murders[,2]   # Render all values from the 2nd column
+
+murders$state # The values of state are displayed
+
+# Displaying variables' values without using the command "data$variable" by defining the variables as objects
+state<-murders[,1]  # Render all values from the 1st column
+state                   
+
+abb<-murders[,2]   # Render all values from the 2nd column
+abb
+
+```
+
+### 1.3b. Data Wrangling  ----
+
+```{r Basic_Wrangling}
+
+install.packages("dplyr") # install dplyr package
+library(dplyr) # load dplyr library
+library(dslabs) # load other libraries
+
+data("murders") # load data
+
+# Mutate function will add new columns or changing existing columns
+
+# Filter function will subset data by specific rows
+
+# Select function will subset data by specific columns
+
+# Pipe Operator will send one function to another 
+
+# Mutate to create new columns
+murders <- mutate(murders, rate = total / population * 100000) # creates a new column
+head(murders)
+
+# Filter to create subset rows
+filter(murders, rate <= 0.71) # grab only rows with a rate less than or equal to 0.71
+
+# Select only specific columns of data
+new_table <- select(murders, state, region, rate) # only grab data from state, region, and rate columns
+head(new_table)
+
+# Pipe Operator to combine this all
+murders %>% # specify the data frame
+  select(state, region, rate) %>% # grab the specified columns from the main data frame
+  filter(rate <= 0.71) # subset to only look at rows with rates lower than or equal to 0.71
+
+```
+
+## 1c. Simple Plots  ====
+### 1.1c. Basic R Plots  ----
+
+```{r Base_R_Plots}
+
+library(dplyr, dslabs) # load libraries
+data("murders") # load data
+
+# Basic scatterplot
+x <- murders$population /10^6
+y <- murders$total
+plot(x, y)
+
+# Basic histogram
+murders <- mutate(murders, rate = total / population * 100000)
+hist(murders$rate)
+
+# Basic boxplot
+boxplot(rate~region, data = murders)
+
+```
+
+## 1d. Summarizing Data ====
+### 1.1d. Basic Summarization Functions  ----
+
+```{r Summarization}
+
+# Basic summaries can include mean, median, standard deviation, and standard error
+# Summarize function computes these summary statistics for data
+
+library(tidyverse, dplyr, dslabs) # load libraries
+data(murders) # load data
+murders <- mutate(murders, rate = total / population * 10^5) # adjusted murder rate
+
+# Summarize Function
+
+# Compute the min, median, and max murder rates for states in the west region
+Stats <- murders %>% # send murders data down the pipe operator
+  filter(region == "West") %>% # only grab region with "west" 
+  summarize(minimum = min(rate),  # grab min from all rows
+            median = median(rate), # grab median from all rows
+            maximum = max(rate)) # grab max from all rows
+print(Stats) # thisis stored as a table now
+
+Stats$median # accessing the component median with the accessor $
+Stats$minimum # accessing the component min with the accessor $
+Stats$maximum # accessing the component max with the accessor $
+
+s$median
+s$maximum
+
+# Compute the average murder rate for all states 
+mean(murders$rate)
+
+# Compute the average murder rate for all states adjusted by population size
+us_murder_rate <- murders %>%  # send murders data down the pipe operator
+  summarize(rate = sum(total) / sum(population) * 10^5)  # compute population adjusted murder rate and get the mean from that (i.e., sum(total)/sum(population)) 
+print(us_murder_rate)
+
+```
+
+```{r Summarization_Quantiles}
+
+# Quantiles function can also extract the min, max, and median values
+
+library(tidyverse, dplyr, dslabs) # load libraries
+data(murders) # load data
+murders <- mutate(murders, rate = total / population * 10^5) # adjusted murder rate
+
+# Quantiles takes a vector and returns the specified values (0 = min, 0.5 = median, 1 = max)
+quantile(murders$total, c(0, 0.5, 1))
+
+# Quantiles with the Summarize Function 
+Stats <- murders %>%  # send murders data down the pipe operator
+  filter(region == "West") %>%  # only grab region with "west" 
+  summarize(range = quantile(rate, c(0, 0.5, 1))) # quantile function
+
+# Returning Quantiles as a dataframe
+my_quantile <- function(x){
+  r <-  quantile(x, c(0, 0.5, 1))
+  data.frame(minimum = r[1], median = r[2], maximum = r[3]) # specifies that min is in column 1, median in column 2, and max in column 3
+}
+murders %>%  # send murders data down the pipe operator
+  filter(region == "West") %>% # only grab region with "west" 
+  summarize(my_quantile(rate)) # quantile function
+print(my_quantile)
+
+```
+
+```{r Pull_Function}
+
+# Pull function will return a given vector as a numerical value
+
+library(tidyverse, dplyr, dslabs) # load libraries
+data(murders) # load data
+murders <- mutate(murders, rate = total / population * 10^5) # adjusted murder rate
+
+# Compute the average rate adjusted by population size
+us_murder_rate <- murders %>%  # send murders data down the pipe operator
+  summarize(rate = sum(total) / sum(population) * 10^5) # computes mean murder rate across all states
+print(us_murder_rate) # average murder rate is stored as a dataframe
+
+# Pull function to return average murder rate as a numeric value
+us_murder_rate %>% pull(rate)
+
+# Pull function with Summarize function to save the number directly
+us_murder_rate <- murders %>% # send murders data down the pipe operator
+  summarize(rate = sum(total) / sum(population) * 10^5) %>% # computes mean murder rate across all states
+  pull(rate) # Apply pull function to this new value
+print(us_murder_rate) # average murder rate is now stored as a number
+
+```
+
+```{r Dot_Placeholder}
+
+# Dot Placeholders (.) serves as a placeholder for data being passed through the pipe 
+
+library(tidyverse, dplyr, dslabs) # load libraries
+data(murders) # load data
+murders <- mutate(murders, rate = total / population * 10^5) # adjusted murder rate
+
+# Compute the average rate adjusted by population size
+us_murder_rate <- murders %>%  # send murders data down the pipe operator
+  summarize(rate = sum(total) / sum(population) * 10^5) # computes mean murder rate across all states
+print(us_murder_rate) # average murder rate is stored as a dataframe
+
+# Use the Dot Placeholder 
+us_murder_rate <- murders %>% # send murders data down the pipe operator
+  summarize(rate = sum(total) / sum(population) * 10^5) %>% # computes mean murder rate across all states
+  .$rate # Apply dot placeholder
+print(us_murder_rate)
+
+class(us_murder_rate) # the dot place holder served as a pull function here
+
+```
+
+```{r Summarization_by_Groups}
+
+# Group_by function allows for data to be separated into groups
+
+library(tidyverse, dplyr, dslabs) # load libraries
+data(murders) # load data
+murders <- mutate(murders, rate = total / population * 10^5) # adjusted murder rate
+
+# Group by region
+murders %>% group_by(region)
+
+# Summarize after grouping
+Stats <- murders %>% # send murders data down the pipe operator
+  group_by(region) %>% # applies group by function
+  summarize(median = median(rate)) # grab median from each group
+print(Stats)
+
+```
+
+```{r Sorting_Tables}
+
+# Arrange function can change the order of an entire dataframe or table
+
+library(tidyverse, dplyr, dslabs) # load libraries
+data(murders) # load data
+murders <- mutate(murders, rate = total / population * 10^5) # adjusted murder rate
+
+# Arrange the order of states by population size
+murders %>% arrange(population) %>% head()
+
+# Arrange the order of states by murder rate - the default is ascending order
+murders %>% arrange(rate) %>% head()
+
+# Arrange the order of states by murder rate in descending order
+murders %>% arrange(desc(rate)) %>% head()
+
+# Arrange the order of states by region and then by murder rate within region
+murders %>% arrange(region, rate) %>% head()
+
+# Return the top 10 states by murder rate
+murders %>% top_n(10, rate)
+
+# Return the top 10 states ranked by murder rate, sorted by murder rate
+murders %>% arrange(desc(rate)) %>% top_n(10)
+
+```
+
+## 1e. Working with Data Table Function ====
+### 1.1e. Data Table  ----
+
+```{r Data_Table}
+
+# Data Table package is a powerful package that can serve as an alternative to dplyr
+
+install.packages("data.table") # install packages
+library(data.table) # load libraries
+library(tidyverse, dplyr, dslabs) # load libraries
+data(murders) # load data
+
+# Creating Data Table from existing dataframe
+murders <- setDT(murders)
+class(murders)
+
+# Selecting Columns using Data Table
+murders[, c("state", "region")] |> head() # option 1
+murders[, .(state, region)] |> head() # option 2
+
+# In option 2 the .() indicates that this is a column name 
+
+# Adding or Changing Columns using Data Table
+murders[, rate := total / population * 100000] # compute adjusted murder rate 
+head(murders)
+
+# the := allows for updating columns by reference
+
+# Create Multiple Columns using Data Table
+murders[, ":="(rate = total / population * 100000, rank = rank(population))] # 
+
+# y is referring to x and := changes by reference
+x <- data.table(a = 1)
+y <- x
+
+x[,a := 2] # If x changes, then y will also be changed
+y
+
+y[,a := 1]
+x
+
+# Use copy to make an actual copy
+x <- data.table(a = 1)
+y <- copy(x)
+x[,a := 2]
+y
+
+```
+
+```{r Subsetting_in_Data_Table}
+
+# Subsetting data can also be done in Data Table similar to dplyr
+
+install.packages("data.table") # install packages
+library(data.table) # load libraries
+library(tidyverse, dplyr, dslabs) # load libraries
+data(murders) # load data
+
+# Prepare Data for Examples
+murders <- setDT(murders) # Assign as data table
+murders[, rate := total / population * 100000] # adjusted murder rate
+
+# Subsetting in Data Table
+murders[rate <= 0.7] # only show rows with murder rate below or equal to 0.7
+
+# Combining Filter and Select in Data Table
+murders[rate <= 0.7, .(state, rate)] # only show rows with murder rate below or equal to 0.7, and then grab the columns state and rate 
+
+```
+
+### 1.2e. Summarizing Using Data Table  ----
+
+```{r Summarization_Data_Table}
+
+install.packages("data.table") # install packages
+library(data.table) # load libraries
+library(tidyverse, dplyr, dslabs) # load libraries
+data(heights) # load data
+heights <- setDT(heights) # set as Data Table
+
+# Summarizing using Data Table
+stats <- heights[, .(average = mean(height), 
+                     standard_deviation = sd(height))]
+print(stats)
+
+# Subsetting and then summarizing using Data Table
+stats <- heights[sex == "Female", 
+                 .(average = mean(height),
+                   standard_deviation = sd(height))]
+print(stats)
+
+# Create quantile function for min, median, and max
+median_min_max <- function(x){
+  qs <- quantile(x, c(0.5, 0, 1))
+  data.frame(median = qs[1], minimum = qs[2], maximum = qs[3])
+}
+
+# Apply quantile function using Data Table
+stats <- heights[, .(median_min_max(height))]
+print(stats)
+
+# Apply group_by function using Data Table
+stats <- heights[, .(average = mean(height), 
+            standard_deviation = sd(height)), 
+            by = sex]
+print(stats)
+
+```
+
+```{r Sorting_Data_Table}
+
+install.packages("data.table") # install packages
+library(data.table) # load libraries
+library(tidyverse, dplyr, dslabs) # load libraries
+data(murders) # load data
+murders <- setDT(murders) # set as Data Table
+murders[, rate := total / population * 100000] # compute murder rate based on population
+
+# Change the order of data by population using Data Table
+murders[order(population)] |> head()
+
+# Change the order of data by population using Data Table in descending order
+murders[order(population, decreasing = TRUE)] 
+
+# Change the order of data by region then by murder rate using Data Table
+murders[order(region, rate)]
+
+```
+
+
+
+# 2. PROGRAMMING BASICS ####
+## 2a. Conditionals & Functions  ====
+### 2.1a. Conditional Expressions ----
+
+```{r Basic_Conditional_Expressions}
+
+# Conditional expressions assist in sorting through data
+
+# ifelse() works like an if-else statement on each elemeent of a vector
+
+# any() works with a vector of logicals and returns true if any elements are true
+
+# all() works with a vector of logicals and returns true if all elements are true
+
+# An if-else statement example
+a <- 0 # assigns a as 0
+
+if(a!=0){ # if a does not = 0
+  print(1/a) # print the recirpricol of a
+} else{
+  print("No reciprocal for 0.") # or print the string if it is 0
+}
+
+# ifelse() general form
+# if(boolean condition){
+#   expressions
+# } else{
+#   alternative expressions
+# }
+
+# Examine which states have murder rate less than 0.5
+
+library(dslabs) # loads library
+data(murders) # loads data
+
+murder_rate <- murders$total / murders$population*100000 # calculate murder rate in vector
+ind <- which.min(murder_rate) #identify minimal murder rate index
+
+# Conditional statement looking if the lowest ind is < 0.5
+if(murder_rate[ind] < 0.5){
+  print(murders$state[ind]) 
+} else{
+  print("No state has murder rate that low")
+}
+
+# Conditional statement looking if the lowest ind is < 0.25
+if(murder_rate[ind] < 0.25){
+  print(murders$state[ind]) 
+} else{
+  print("No state has a murder rate that low.")
+}
+
+# ifelse function is similar to if-else conditional
+a <- 0
+ifelse(a > 0, 1/a, NA) # ifelse combines this all in one line
+
+# vector example
+a <- c(0,1,2,-4,5)
+result <- ifelse(a > 0, 1/a, NA) # if item in vector is greater than 0, 1/it, or list as NA
+
+# Using ifelse to identify and replace NAs with 0s
+data(na_example) # load data
+sum(is.na(na_example)) # Compute sum of all NAs in data
+
+no_nas <- ifelse(is.na(na_example), 0, na_example) # if NA, replace with 0, or the same value
+sum(is.na(no_nas)) # Compute sum of all NAs
+
+# the any() and all() functions evaluate logical vectors
+z <- c(TRUE, TRUE, FALSE) # logical vector
+any(z) # checks if any of the logical vector contain true
+all(z) # cehcks if all of the logical vector contain true
+
+```
+
+### 2.1b. Functions ----
+
+```{r Basic_Functions}
+
+# Functions can be the bread and butter post-workout meal you've been craving if applied right
+
+# Define a function
+avg <- function(x){ # create function name and inputs
+  s <- sum(x) # define inner function aspects
+  n <- length(x) # define inner function aspects
+  s/n # define inner function aspects to produce output
+}
+
+# All variables defined within a function are not saved to the workspace 
+s <- 3 
+avg(1:10) # 5.5 is not saved on workspace
+s
+
+# Function general form
+# my_function <- function(VARIABLE_NAME){
+#   perform operations on VARIABLE_NAME and calculate VALUE
+#   VALUE is the final line in a function
+# }
+
+# Functions with multiple arguments
+
+avg <- function(x, arithmetic = TRUE){ # Only apply function if arithmetic vector
+  n <- length(x) # find length of vector
+  ifelse(arithmetic, sum(x)/n, prod(x)^(1/n)) # if not arithmetic, result in geometric mean
+}
+
+```
+
+### 2.1c. For Loops ----
+
+```{r For_Loops}
+
+# For-loops define a range of variables to perform given operations on (e.g., each subject in a file, each row in a dataset, etc.)
+
+
+# Function computing sum of integers 1 through n
+compute_s_n <- function(n){
+  x <- 1:n
+  sum(x)
+}
+
+# Function applied to 1:55 
+compute_s_n(55)
+
+# Basic For-Loop (i.e., for integers 1 to 5, print the integer)
+for(i in 1:5){
+  print(i)
+}
+
+# For-Loop applies to function
+m <- 30 # create variable
+s_n <- vector(length=m) # creates an empty vector up to the size of m
+
+for(n in 1:m){ # for 1 through the size of m
+  s_n[n] <- compute_s_n(n) # fill in the current vector index with the sum of all integers up to that point
+}
+
+# Plot these results
+n <- 1:m # create a vector for 1 to size of m
+plot(n, s_n) # plot the vector by the summation values
+lines(n, n*(n+1)/2)
+
+# Create a table of values from formula to compare if function in for-loop produces same results
+head(data.frame(s_n = s_n, formula = n*(n+1)/2))
+
+# Add lines from formula to predicted plot
+plot(n, s_n) + lines(n, n*(n+1)/2)
+
+```
