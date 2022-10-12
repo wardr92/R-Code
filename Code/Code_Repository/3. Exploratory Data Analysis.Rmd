@@ -1,0 +1,728 @@
+---
+title: "Exploratory Data Analysis"
+output: github_document
+---
+
+# 1. BASICS ####
+## 1a. Set Up  ====
+### 1.1a. Install Packages & Load Libraries ----
+
+```{r Packages}
+
+# Install the following packages
+install.packages("Rmisc")     
+install.packages("tidyverse") 
+install.packages("readr")  
+install.packages("dslabs")
+install.packages("class")   
+install.packages("e1071")
+install.packages("Hmisc")
+install.packages("pastecs")
+install.packages("ggplot2")
+
+```
+
+```{r Libraries}
+
+# Load the following libraries
+library(Rmisc)
+library(tidyverse)
+library(readr)
+library(dslabs)
+library(class)           
+library(e1071)
+library(Hmisc)
+library(pastecs)
+library(ggplot2)
+
+```
+
+### 1.2a. Set Up Directory & Load Data ----
+
+```{r Directory}
+
+# Directory
+getwd()
+setwd("/Users/wardr/Desktop")
+getwd()
+
+```
+
+```{r Load_Data}
+
+# Load data
+data("Orange") # loads Orange dataset
+
+```
+
+# 2. INITIAL DATA ASSESSMENTS ####
+## 2a. Proportions ====
+### 2.1a. Frequency & Cumulative Frequency ----
+
+```{r Frequency_Tables}
+
+# Make a new dataset and calculate all frequencies and proportions
+Wildlife <- c(rep("Wolvering", 250),
+              rep("Grey Wolve", 670),
+              rep("Deer", 7337),
+              rep("Elk",  3770),
+              rep("Bald Eagle", 855),
+              rep("Woodpecker", 2369),
+              rep("Golde Eagle", 157),
+              rep("California Condor", 97))
+view(Wildlife)
+
+# Create a frequency table
+Wildlife.table <- table(Wildlife)  # Creating the frequency table 
+Wildlife.table 
+
+# Sorting the table by frequency of occurrence
+Wildlife.table2 <- sort(Wildlife.table, decreasing = TRUE)  # Sorting by highest to lowest 
+Wildlife.table2  
+
+# Calculating proportions and percentages
+prop.table(Wildlife.table2)  # Proportions of of each category in variable
+round(prop.table(Wildlife.table2), 2)  # Proportions with 2 decimal places
+round(prop.table(Wildlife.table2), 4) * 100  # Percentages with decimal places
+
+# Load another dataset
+library(dslabs)
+data(heights)
+
+# Make a table of proportions from categorical variables
+round(prop.table(table(heights$sex)), 4) *100 # Shows proportions of Female vs Male in data set
+
+```
+
+```{r Cumulative_Frequency_Function_Plot}
+
+# Load the data
+library(dslabs)
+data(heights)
+
+# Create a vector of each unit in heights
+height <- seq(min(heights$height), max(heights$height), length = 1050)  
+
+# Create cumulative distribution function 
+cdf_function <- function(x) {    # computes the probability for being below the mean 
+    mean(heights$height<= x)
+}
+cdf_percentage <- sapply(height, cdf_function) # apply cdf funtion to height vector
+plot(height, cdf_percentage) # plot cumulative frequency distribution
+
+```
+
+## 2b. Summary Statistics ====
+### 2.1b. Central Tendancy Measures ----
+
+```{r Mean}
+
+# Look at data
+view(Orange)
+
+# Mean for a variable
+mean(Orange$age) # mean age of trees
+mean(Orange$circumference) # mean circumference of trees
+
+# Trimming upper and lower percentages of a variable
+mean(Orange$age, trim = 0.05, na.rm = T) # trims 5% off lower and upper ends of this variable
+mean(Orange$circumference, trim = 0.05, na.rm = T) # trims 5% off lower and upper ends of this variable
+
+# Mean for multiple variables
+sapply(Orange, mean, na.rm = T)
+
+# "sapply" can be used for sd, var, min, max, median, range, and quantile
+
+# Mean across multiple variables by category
+tapply(Orange$age, Orange$Tree, mean)
+
+# "tapply" similar to "sapply" but second index indicates categorical variable
+
+# Load another dataset
+library(dslabs)
+data(heights)
+
+# Define x as male heights vector
+males_index <- heights$sex == "Male" # assess index location for males
+xy <- heights$height[males_index] # assign heights values to new vector for males only
+
+# Calculate mean and standard deviation
+average_mean <- sum(xy)/length(xy) # manual mean calculation
+average_mean <- mean(xy) # function for mean calculation
+SD <-  sqrt(sum((xy - average_mean)^2)/length(xy)) # manual SD calculation
+SD <- sd(xy) # function for SD calculation
+
+# Show mean and standard deviation
+c(average = average_mean, SD = SD)
+
+# Compute standard values (z-scores)
+z <- scale(xy) # scale into z scores
+
+# Calculate the proportion of values within 2 standard deviations of the mean
+mean(abs(z) < 2)
+
+
+```
+
+```{r Median}
+
+# Median value of variable
+median(Orange$age)    
+
+sapply(Orange, mean, na.rm = T)
+
+```
+
+```{r Confidence_Intervals}
+
+# Confidence Intervals for Variables
+CI(Orange$age, ci = 0.95) # 95% CIs for variable
+
+# t-test also can provide 95% CIs for a variale
+t.test(Orange$age)
+
+```
+
+### 2.2b. Variability Measures ----
+
+```{r Variance}
+
+# Measures of Variability
+var(Orange$age) # variance
+sd(Orange$age) # standard deviation
+min(Orange$age) # minimum value
+max(Orange$age) # maximum value
+max(Orange$age) - min(Orange$age) # range value
+
+```
+
+## 2c. Probability Statistics ====
+### 2.1c. Cumulative Distribution for Normal Distribution  ----
+
+```{r Cumulative_Distribution_4_Normal_Distribution}
+
+# Load data
+library(dslabs)
+data(heights)
+
+# Create a vector with heights from only Males
+x <- heights %>% filter(sex=="Male") %>% pull(height)
+
+# Calculate probability that a Male is taller than a set height
+1 - pnorm(70.5, mean(x), sd(x)) # pnorm provides approximated cumulative distribution for a normal distribution based on mean and SD
+
+# Plot cumulative distribution for each reported Male height
+plot(prop.table(table(x)),
+     xlab = "a = Height (inches)",
+     ylab = "Proportion (Pr(x = a))")
+
+```
+
+```{r Probabilities_Over_Intervals}
+
+# Load data
+library(dslabs)
+data(heights)
+
+# Create a vector with heights from only Males
+x <- heights %>% filter(sex=="Male") %>% pull(height)
+
+# Use intervals to determine probabilities for a range of values
+
+# Calculate probabilities for height ranges from raw data
+mean(x <= 68.5) - mean(x <= 67.5) # probability someone has height between  67.5 and 68.5
+mean(x <= 69.5) - mean(x <= 68.5) # probability someone has height between  68.5 and 69.5
+mean(x <= 70.5) - mean(x <= 69.5) # probability someone has height between  69.5 and 70.5
+
+# Calculate approximated probabilities for height ranges from 
+pnorm(68.5, mean(x), sd(x)) - pnorm(67.5, mean(x), sd(x)) # approximated proportion someone has height between  67.5 and 68.5
+pnorm(69.5, mean(x), sd(x)) - pnorm(68.5, mean(x), sd(x)) # approximated probability someone has height between  68.5 and 69.5
+pnorm(70.5, mean(x), sd(x)) - pnorm(69.5, mean(x), sd(x)) # approximated probability someone has height between  69.5 and 70.5
+
+# Look to see how well these match up
+
+# Approximation is not good for intervals that DO NOT INCLUDE an INTEGER
+mean(x <= 70.9) - mean(x <= 70.1)
+pnorm(70.9, mean(x), sd(x)) - pnorm(70.1, mean(x), sd(x))
+
+# Example of Discretization - when reported values are shown in discrete values due to rounding while true values are continuous
+
+```
+
+### 1.4a. Quantiles, Percentiles, & Quartiles  ----
+
+```{r Quantiles_Percentiles_Quartiles_Basics}
+
+# Load data
+library(dslabs)
+data(heights)
+
+# Quantiles provide cut-off points indicating the value at which a set % of observations are less than or equal to that value. Quantiles use percentiles to divide a dataset into specific intervals
+
+# Quantile examples
+quantile(heights$height,.5) # 50% quantile
+p <- seq(0.01, 0.99, 0.01) # Create percentiles from 1 to 100%
+quantile(heights$height, p) # Look at 100 intervals of quantiles
+
+# Quartiles divide a dataset into 4 parts (25%, 50%, 75%, and 100%) for each respective percentile
+summary(heights$height) # use summary function to find 1st and 3rd quartiles
+
+# Compare with quartiles function
+p <- seq(0.01, 0.99, 0.01) # Create percentiles from 1 to 100%
+percentiles <- quantile(heights$height, p) # Look at 100 intervals of quantiles to c
+percentiles[names(percentiles) == "25%"] # examine 1st percentile value to see if matches quartile
+percentiles[names(percentiles) == "75%"] # examine 3rd percentile value to see if matches quartile
+
+# Remember, 50th percentile = median
+
+```
+
+```{r qnorm_Quantiles}
+
+# qnorm() provides theoretical values of each quantile with the probability "p" of observing a value less than or equal to that quantile in a given distribution with a mean of "mu" and standard deviation of "sigma".
+
+# Example of qnorm
+qnorm(p, 0, 1) # all quantiles
+
+# pnorm() and qnorm() are inverse functions, as seen below
+pnorm(-1.96) # pnorm is 0.025 quantile
+qnorm(0.025) # qnorm return value of -1.96
+
+# Theoretical quantiles are derived from qnorm(), as seen below
+p <- seq(0.01, 0.99, 0.01) # Create percentiles from 1 to 100%
+qnorm(p, 69, 3) # examine all theoretical quantile values for each percentile 
+
+```
+
+```{r Quantile_Plots}
+
+# Load data
+library(tidyverse)
+library(dslabs)
+data(heights)
+
+# Identify indices where sex = Male 
+index <- heights$sex=="Male"
+
+# Define x and y variables
+x <- heights$height[index] # Only grab heights from Male indices
+y <- scale(x) # z-score the heights
+
+# Identify the proportion of data below or equal to 69.5
+mean(x <= 69.5)
+
+# Calculate quantiles
+p <- seq(0.05, 0.95, 0.05) # identify quantiles from 5% to 100% in steps of %5
+observed_quantiles <- quantile(x, p) # Report empirical/observed quantiles from raw heights for each percentile defined above
+theoretical_quantiles <- qnorm(p, mean = mean(x), sd = sd(x)) # Report theoretical quantiles from mean and SD for each percentile defined above
+
+# Create Q-Q Plot for theoretical vs emprical quantiles
+plot(theoretical_quantiles, observed_quantiles) + 
+  abline(0,1) # add line from 0 to 1 (linear)
+
+# Create Q-Q Plot for theoretical vs emprical z-scored quantiles
+observed_quantiles <- quantile(y, p) # quantiles for z-scored heights
+theoretical_quantiles <- qnorm(p)
+
+plot(theoretical_quantiles, observed_quantiles) + 
+  abline(0,1)
+
+```
+
+
+
+# 3. SKEW & KURTOSIS ASSESSMENT ####
+## 3a. Basic Visual Examinations  ====
+### 3.1a. Distribution Visualization ----
+
+```{r Distribution_Hist_Box}
+
+# Look at histogram of data
+hist(Orange$age)
+hist(Orange$circumference)
+
+# Look at boxplot of data
+boxplot(Orange$age)
+boxplot(Orange$circumference)
+
+```
+
+## 3b. Statistical Calculations  ====
+### 3.1b. Skew ----
+
+```{r Skew}
+
+# Calculate skew from data
+skewness (Orange$age, na.rm = F, type = 2)
+
+# Type can be:
+# 1 = older formula (don't use)
+# 2 = common formula used in SAS most programming languages
+# 3 = formula used in MINITAB & BMPD
+
+```
+
+### 2.2b. Kurtosis ----
+
+```{r Kurtosis}
+
+# Calculate kurtosis from data
+kurtosis (Orange$age, na.rm = F, type = 2)
+
+# Type can be:
+# 1 = older formula (don't use)
+# 2 = common formula used in SAS most programming languages
+# 3 = formula used in MINITAB & BMPD
+
+```
+
+# 4. FURTHER NORMALITY ASSESSMENT ####
+## 3a. Visual Examinations  ====
+### 4.1a. Q-Q Plots ----
+
+```{r Basic_QQ_Plot}
+
+# R Q-Q Plot
+qqnorm(Orange$age)
+
+# ggplot Q-Q Plot
+qplot(sample = Orange$age, stat = FALSE) # must include "sample =" to plot this
+
+```
+
+### 4.2a. Histogram Plots ----
+
+```{r Basic_Histogram}
+
+# Histogram Plot
+hist(Orange$age)
+
+# Additional arguments include:
+# x = variable
+# main = title
+# ylab = label for y axis
+# freq = FALSE (probability densities) vs TRUE (frequency densities)
+# breaks = number of bins
+# col = color
+
+# Create random distribution to show this
+random <- rnorm(1000) # 1000 random samples 
+
+# Adding these elements to histogram using random distribution
+hist(random, main = "Frequency Distribution", ylab = "Frequency", col = "red")  # Y axis with the frequency
+hist(random, main = "Density Distribution", ylab = "Density", freq = FALSE, col = "#223476")  # Y axis with the density
+hist(random, main = "Frequency Distribution", ylab = "Frequency", breaks = 5, col = "#FF7F50") 
+hist(random, main = "Frequency Distribution", ylab = "Frequency", breaks = 13, col = "cyan")
+
+```
+
+```{r Central_Lines}
+
+# Create random dataset with normal distribution
+random <- rnorm(1000) # 1000 random samples 
+
+# Make basic histogram
+hist(random, main = "Frequency Distribution", ylab = "Frequency", breaks = 13, col = "blue")
+
+# Add a straight line at the mean throughout the histogram
+abline(v = mean(random, na.rm = FALSE), col = "black", lwd = 5) 
+
+# Add a straight line at the median throughout the histogram
+abline(v = median(random, na.rm = FALSE), col = "black", lwd = 5) 
+
+# v indicates statistics to estimate
+# lwd is width of line
+
+```
+
+```{r Add_Percentiles}
+
+# Create random dataset with normal distribution
+random <- rnorm(1000) # 1000 random samples 
+
+# Make basic histogram
+hist(random, main = "Frequency Distribution", ylab = "Frequency", breaks = 13, col = "blue")
+
+# Calculate the quantiles
+quantile <- quantile(random, c(.25, .5, .75), na.rm = TRUE)   
+
+# Examine percentiles based on quantiles
+quantile                                     
+
+# Plot the percentiles as points in the histogram
+points (quantile, c(.25, .5, .75), col = 6:9, pch = 15, cex = 3)
+
+```
+
+```{r Add_Normal_Curve}
+
+# Create random dataset with normal distribution
+random <- rnorm(1000) # 1000 random samples 
+
+# Make basic histogram
+hist(random, main = "Frequency Distribution", ylab = "Frequency", freq = FALSE, breaks = 13, col = "blue")
+
+# Add normal curve
+curve(dnorm(x, mean = mean(random), sd = sd(random)), 
+      col = "black", 
+      lwd = 4,
+      add = TRUE)
+
+# Normal curve can only be added if histogram "freq" = "false"
+# dnorm is the density normal distribution function
+# add should be TRUE to add the curve over the histogram
+
+```
+
+### 4.3a. Box Plots ----
+
+```{r Basic_Box_Plot}
+
+# Box Plot
+boxplot(Orange$age)
+
+# Additional arguments include:
+# x = variable
+# main = title
+# ylab = label for y axis
+# col = color
+
+# Create random distribution to show this
+random <- rnorm(1000) # 1000 random samples 
+
+# Adding these elements to Box Plots using random distribution
+boxplot(random, main = "Boxplot of the Random Distribution", ylab = "Values", col = "darkorange1")
+boxplot(random, main = "Boxplot of the Random Distribution", ylab = "Values", col = "green")
+boxplot(random, main = "Boxplot of the Random Distribution", ylab = "Values", col = "456789")
+
+```
+
+## 4b. Statistical Calculations  ====
+### 4.1b. Shaprio-Wilk Test ----
+
+```{r Shaprio_Wilk}
+
+# Use Shapiro-Wilk if dataset is smaller than 50 sample size 
+
+# Conduct Shapiro-Wilk test
+shapiro.test(Orange$age)
+
+# If p < 0.05, then significant deviations from normality present
+
+```
+
+### 4.2b. Kolmogorov-Smirnov Test ----
+
+```{r Kolmogorov_Smirnov}
+
+# Use Kolmogorov-Smirnov if dataset is larger than 50 sample size 
+
+# Examine mean and sd for data first
+mean(Orange$age)
+sd(Orange$age)
+
+# Conduct Kolmogorov-Smirnov  test
+ks.test(Orange$age, "pnorm", 922.1429, 491.8645)
+
+# If p < 0.05, then significant deviations from normality present
+
+# In this function, first index is the variable, second is the cumulative distribution function, third is mean, and fourth is sd
+
+# Cumulative distributions can be:
+# pnorm = probability normal distribution
+# qnorm = quantile normal distribution
+# dnorm = density normal distribution
+
+```
+
+# 5. ADDITIONAL TOOLS ####
+## 5a. Simulating Random Distributions  ====
+
+```{r Distribution_Simulation}
+
+# Sample randomly to create a normal distributed variable
+random <- rnorm(1000) # 1000 random samples 
+summary(random) # Assess basics of this variable
+hist(random) # Examine distribution
+
+# Sample randomly to create variable with mean of 100 and sd of 15
+random2 <- rnorm(1000, 100, 15) # 1000 random samples, mean of 100, sd of 15
+summary(random2) # Assess basics of this variable
+hist(random2) # Examine distribution
+
+```
+
+
+## 5b. All-in-One Summary Statistic Tools  ====
+
+```{r Summary_Stats}
+
+# Sample randomly to create a normal distributed variable
+random <- rnorm(1000) # 1000 random samples 
+
+# Hmisc package
+describe(random)
+
+# pastecs package
+round(stat.desc(random, basic = TRUE, norm = TRUE), 2)
+
+# basic = TRUE displays all basic statistics with number of values (nbr.val), null values (nbr.null) and missing values (nbr.na)
+# norm = returns normal distribution statistics (TRUE) such as:
+  # skew.2SE = skewness's significant criterion = skewness/2.SEskewness. If skew.2SE>1 skewness is significantly different from zero
+  # kurt.2SE = kurtosis's significant criterion = kurtosis/2.SEkurtosis. If kurt.2SE>1 kurtosis is significantly different from zero
+# normtest.W = Shapiro-Wilk test of normality that will be presented in the next subtitle
+# # Results are in the format of raising to the power
+
+```
+
+# 6. TRANSFORMING VARIABLES ####
+## 6a. Multiplicative Transformations  ====
+### 6.1a. Square Root ----
+
+```{r Square_Root}
+
+# Load dataset
+data("InsectSprays")
+
+# Evaluate distribution
+hist(InsectSprays$count)
+
+# Square root variable
+InsectSprays$count <- sqrt(InsectSprays$count)      
+
+# Assess new transformed variable
+describe(InsectSprays$count)
+ks.test(InsectSprays$count, "pnorm", 2.81, 1.27) # K-S test shows normal distributed
+qplot(sample = InsectSprays$count, stat = NULL) # qq plot suggests maybe not normal 
+hist(InsectSprays$count) # histogram suggests not normal
+boxplot(InsectSprays$count) # boxplot suggests normal
+
+```
+
+### 6.2a. Logarithm ----
+
+```{r Log}
+
+# Load dataset
+data("InsectSprays")
+
+# Evaluate distribution
+hist(InsectSprays$count)
+
+# Log transform variable with base of 10
+InsectSprays$count <- log10(InsectSprays$count)      
+
+# Assess new transformed variable
+describe(InsectSprays$count)
+ks.test(InsectSprays$count, "pnorm", mean, sd) # K-S test cannot be calculated 
+qplot(sample = InsectSprays$count, stat = NULL) # qq plot suggests maybe not normal 
+hist(InsectSprays$count) # histogram suggests not normal
+boxplot(InsectSprays$count) # boxplot suggests not normal
+
+```
+
+### 6.3a. Inverse Log ----
+
+```{r Inverse_Log}
+
+# Load dataset
+data("InsectSprays")
+
+# Evaluate distribution
+hist(InsectSprays$count)
+
+# Log transform variable on base of e
+InsectSprays$count <- log(InsectSprays$count)      
+
+# Assess new transformed variable
+describe(InsectSprays$count)
+ks.test(InsectSprays$count, "pnorm", mean, sd) # K-S test cannot be calculated 
+qplot(sample = InsectSprays$count, stat = NULL) # qq plot suggests maybe not normal 
+hist(InsectSprays$count) # histogram suggests not normal
+boxplot(InsectSprays$count) # boxplot suggests not normal
+
+```
+
+### 6.4a. Z-Score Standardization ----
+
+```{r z_score}
+
+# Load dataset
+data("InsectSprays")
+
+# Evaluate distribution
+hist(InsectSprays$count)
+
+# z-score transform variable
+InsectSprays$count <- scale(InsectSprays$count)      
+
+# Assess new transformed variable
+describe(InsectSprays$count)
+ks.test(InsectSprays$count, "pnorm", 0, 1) # K-S test suggests non-normal 
+qplot(sample = InsectSprays$count, stat = NULL) # qq plot suggests maybe not normal 
+hist(InsectSprays$count) # histogram suggests not normal
+boxplot(InsectSprays$count) # boxplot suggests not normal
+
+```
+
+### 6.5a. Raise to Exponential Power ----
+
+```{r Power_Raise}
+
+# Load dataset
+data("InsectSprays")
+
+# Evaluate distribution
+hist(InsectSprays$count)
+
+# Transform variable by raising to power of 2
+InsectSprays$count <- InsectSprays$count^2    
+
+# Assess new transformed variable
+describe(InsectSprays$count)
+ks.test(InsectSprays$count, "pnorm", 141.42, 173.31) # K-S test suggests non-normal 
+qplot(sample = InsectSprays$count, stat = NULL) # qq plot suggests maybe not normal 
+hist(InsectSprays$count) # histogram suggests not normal
+boxplot(InsectSprays$count) # boxplot suggests not normal
+
+```
+
+
+## 6b. Variable Type Transformations  ====
+### 6.1b. Continuous to Dichotomous ----
+
+```{r Cont_2_Dich}
+
+# Load dataset
+data("lynx")
+
+# Evaluate distribution
+hist(lynx)
+
+# Categorize values as 0 or 1
+Dich_lynx <- ifelse(lynx > 3000, 1, 0)
+
+# Evaluate distribution
+hist(Dich_lynx)
+
+```
+
+### 6.2b. Continuous to Ordinal ----
+
+```{r Cont_2_Ord}
+
+# Load dataset
+data("lynx")
+
+# Evaluate distribution
+hist(lynx)
+
+# Categorize based on 3 ordinal levels
+ord_lynx <- cut(lynx, breaks = c(0,3000, 5000, 7000), 
+                labels = c("Trapping<3K", "Trapping3k-5k", "Trapping>5k"))
+ord_lynx <- table(ord_lynx) # make variable into a table
+
+# Evaluate variable
+barplot(ord_lynx)
+
+```
